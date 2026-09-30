@@ -24,12 +24,24 @@ interface UserRow {
   updated_at: string;
 }
 
+/**
+ * Demo-only fallback so the prototype logs in even when AUTH_SECRET has not
+ * been configured (e.g. a fresh Vercel deployment). Set AUTH_SECRET in the
+ * .env.local / hosting environment to sign sessions with your own key.
+ */
+const DEMO_SESSION_SECRET = 'aletheia-demo-session-secret-change-me-in-production';
+
+let warnedAboutSecret = false;
+
 function secret(): string {
   const value = process.env.AUTH_SECRET;
-  if (!value || value.length < 32) {
-    throw new Error('AUTH_SECRET is missing or too short. Copy .env.example to .env.local and set it.');
+  if (value && value.length >= 32) return value;
+  if (!warnedAboutSecret) {
+    warnedAboutSecret = true;
+    // eslint-disable-next-line no-console
+    console.warn('[aletheia] AUTH_SECRET missing or too short — using the demo fallback secret for session signing.');
   }
-  return value;
+  return DEMO_SESSION_SECRET;
 }
 
 function sign(payload: string): string {

@@ -13,6 +13,13 @@ export interface AuthState {
   message?: string;
 }
 
+/** redirect() throws a special error that must always propagate. */
+function isRedirectError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && typeof (error as { digest?: string }).digest === 'string'
+    ? (error as { digest: string }).digest.startsWith('NEXT_REDIRECT')
+    : false;
+}
+
 function ensureSeeded(): AuthState {
   if (isDatabaseSeeded()) return {};
   return {
@@ -36,8 +43,13 @@ export async function loginAction(_prev: AuthState, formData: FormData): Promise
     return { error: 'Those details did not match an account. Check the demo credentials shown below.' };
   }
 
-  await startSession(user.id, user.role);
-  redirect(homePathForRole(user.role));
+  try {
+    await startSession(user.id, user.role);
+    redirect(homePathForRole(user.role));
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return { error: 'Something went wrong while starting your session. Please try again.' };
+  }
 }
 
 export async function registerAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -59,9 +71,14 @@ export async function registerAction(_prev: AuthState, formData: FormData): Prom
   const userId = createUser({ email, passwordHash, fullName, role: 'STUDENT' });
   createUserWithProfile(userId, { fullName, email });
 
-  await startSession(userId, 'STUDENT');
-  revalidatePath('/', 'layout');
-  redirect('/student/profile?welcome=1');
+  try {
+    await startSession(userId, 'STUDENT');
+    revalidatePath('/', 'layout');
+    redirect('/student/profile?welcome=1');
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return { error: 'Something went wrong while creating your account. Please try again.' };
+  }
 }
 
 export async function logoutAction(): Promise<void> {
