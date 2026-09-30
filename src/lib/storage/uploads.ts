@@ -9,7 +9,15 @@ import path from 'node:path';
  * through an authenticated route that checks ownership (docs/05 §10, §34).
  */
 
-const UPLOAD_ROOT = path.resolve(process.cwd(), process.env.STORAGE_PATH || '.data/uploads');
+/**
+ * On Vercel the project directory is read-only, so uploads go to /tmp
+ * (ephemeral but writable). An explicit STORAGE_PATH still wins.
+ */
+const UPLOAD_ROOT = process.env.STORAGE_PATH
+  ? path.resolve(process.cwd(), process.env.STORAGE_PATH)
+  : process.env.VERCEL === '1'
+    ? '/tmp/aletheia-uploads'
+    : path.resolve(process.cwd(), '.data/uploads');
 export const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES || 5 * 1024 * 1024);
 
 export const ALLOWED_MIME_TYPES: Record<string, string> = {

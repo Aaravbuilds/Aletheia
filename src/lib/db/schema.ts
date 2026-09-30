@@ -1,4 +1,4 @@
--- Aletheia prototype schema (SQLite).
+export const SCHEMA_SQL = `-- Aletheia prototype schema (SQLite).
 -- Mirrors docs/06-DATA-AI-SPECS.md. Government-scheme data lives in
 -- scholarship_schemes / eligibility_rules / required_documents and is never
 -- derived from user input.
@@ -207,3 +207,4 @@ CREATE TABLE IF NOT EXISTS app_counters (
   key   TEXT PRIMARY KEY,
   value INTEGER NOT NULL
 );
+`;

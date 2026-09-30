@@ -1,6 +1,9 @@
 import Database from 'better-sqlite3';
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
+
+import { SCHEMA_SQL } from './schema';
+import { seedDatabase } from './seed';
 
 /**
  * Database access is isolated behind this module so the prototype can be moved
@@ -9,8 +12,17 @@ import path from 'node:path';
  */
 
 const ROOT = process.cwd();
-const DB_PATH = path.resolve(ROOT, process.env.DATABASE_PATH || '.data/aletheia.db');
-const SCHEMA_PATH = path.resolve(ROOT, 'src/lib/db/schema.sql');
+
+/**
+ * Vercel functions run on an ephemeral, read-only filesystem except /tmp.
+ * Default the database there so the app boots on serverless instead of failing
+ * on the read-only project directory. An explicit DATABASE_PATH still wins.
+ */
+const DB_PATH = process.env.DATABASE_PATH
+  ? path.resolve(ROOT, process.env.DATABASE_PATH)
+  : process.env.VERCEL === '1'
+    ? '/tmp/aletheia.db'
+    : path.resolve(ROOT, '.data/aletheia.db');
 
 declare global {
   // eslint-disable-next-line no-var
@@ -24,14 +36,33 @@ function createConnection(): Database.Database {
   const db = new Database(DB_PATH);
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
-  db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
+  db.exec(SCHEMA_SQL);
   return db;
+}
+
+let seeding = false;
+let seededChecked = false;
+
+function autoSeedIfNeeded(): void {
+  if (seededChecked || seeding) return;
+  seededChecked = true;
+  const db = globalThis.__aletheiaDb as Database.Database;
+  const row = db.prepare('SELECT COUNT(*) AS count FROM users').get() as { count: number };
+  if (row.count === 0) {
+    seeding = true;
+    try {
+      seedDatabase({ reset: false, log: false });
+    } finally {
+      seeding = false;
+    }
+  }
 }
 
 export function getDb(): Database.Database {
   if (!globalThis.__aletheiaDb) {
     globalThis.__aletheiaDb = createConnection();
   }
+  autoSeedIfNeeded();
   return globalThis.__aletheiaDb;
 }
 
