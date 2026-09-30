@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  }
+
+  * {
+    @apply border-line;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-ink;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-maroon ring-offset-2 ring-offset-canvas;
+  }
+
+  ::selection {
+    @apply bg-maroon-wash text-maroon-dark;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Opening splash — one-off, played once per browser session.          */
+/* ------------------------------------------------------------------ */
+
+@keyframes aletheia-letter {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes aletheia-ink {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+    filter: blur(10px);
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes aletheia-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes aletheia-rule {
+  0% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes aletheia-exit {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.splash-name {
+  display: flex;
+  justify-content: center;
+}
+
+.splash-ink {
+  opacity: 0;
+  will-change: transform, opacity, filter;
+  animation: aletheia-ink 1000ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.splash-letter {
+  display: inline-block;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: aletheia-letter 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.splash-tag {
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: aletheia-rise 750ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.splash-rule {
+  opacity: 0;
+  transform-origin: left center;
+  animation: aletheia-rule 650ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.splash-exit {
+  animation: aletheia-exit 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Warm ivory canvas with a faint maroon halo. Light on purpose: the
+   burgundy logo must stay fully readable and unblurred. */
+.splash-root {
+  background-image:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(101, 31, 42, 0.05) 0px,
+      rgba(101, 31, 42, 0) 58%
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(101, 31, 42, 0.03) 0px,
+      rgba(101, 31, 42, 0.03) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-root,
+  .splash-letter,
+  .splash-tag,
+  .splash-rule,
+  .splash-ink {
+    animation: none;
+  }
+}
+
+@layer components {
+  /* Subtle woven/geometric motif used only in sparse decorative areas. */
+  .motif-weave {
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        rgba(101, 31, 42, 0.045) 0px,
+        rgba(101, 31, 42, 0.045) 1px,
+        transparent 1px,
+        transparent 9px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        rgba(101, 31, 42, 0.035) 0px,
+        rgba(101, 31, 42, 0.035) 1px,
+        transparent 1px,
+        transparent 9px
+      );
+  }
+
+  .rule-dotted {
+    background-image: linear-gradient(to right, #DFD4C0 40%, transparent 0%);
+    background-size: 6px 1px;
+    background-repeat: repeat-x;
+  }
+
+  .skeleton {
+    @apply rounded bg-parchment;
+    background-image: linear-gradient(90deg, rgba(237, 228, 212, 0) 0, rgba(255, 253, 249, 0.85) 50%, rgba(237, 228, 212, 0) 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
