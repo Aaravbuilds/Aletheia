@@ -164,49 +164,89 @@ export default async function AdminApplicationsPage({
           {filtered.length === 0 ? (
             <EmptyState title="No applications match" description="Try a different filter, status, scheme or search." />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[46rem] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-line text-left text-xs uppercase tracking-[0.12em] text-muted">
-                    <th className="py-2.5 pr-4 font-medium">Application</th>
-                    <th className="py-2.5 pr-4 font-medium">Student</th>
-                    <th className="py-2.5 pr-4 font-medium">Scheme</th>
-                    <th className="py-2.5 pr-4 font-medium">Submitted</th>
-                    <th className="py-2.5 pr-4 font-medium">Corrections</th>
-                    <th className="py-2.5 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map(({ application, student, scheme: metaScheme, openDeficiencies: open }) => (
-                    <tr key={application.id} className="border-b border-line/60 last:border-0">
-                      <td className="py-3 pr-4">
-                        <Link
-                          href={`/admin/applications/${application.id}`}
-                          className="font-medium text-ink hover:text-maroon"
-                        >
-                          {application.applicationNumber || 'Draft'}
-                        </Link>
-                        <span className="block text-xs text-muted">{application.cycleLabel ?? '—'}</span>
-                      </td>
-                      <td className="py-3 pr-4">
-                        <span className="text-ink">{student?.fullName ?? 'Student'}</span>
-                        <span className="block text-xs text-muted">
-                          {student?.isST ? 'ST' : student?.category ?? '—'} · {student?.state ?? '—'}
-                        </span>
-                      </td>
-                      <td className="py-3 pr-4 text-ink">{metaScheme?.shortName ?? '—'}</td>
-                      <td className="py-3 pr-4 text-muted">{formatDate(application.submittedAt)}</td>
-                      <td className="py-3 pr-4">
-                        {open > 0 ? <Badge tone="warning">{open} open</Badge> : <span className="text-muted">—</span>}
-                      </td>
-                      <td className="py-3">
-                        <ApplicationStatusBadge status={application.status} />
-                      </td>
+            <>
+              <div className="hidden overflow-x-auto lg:block">
+                <table className="w-full min-w-[46rem] border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-line text-left text-xs uppercase tracking-[0.12em] text-muted">
+                      <th className="py-2.5 pr-4 font-medium">Application</th>
+                      <th className="py-2.5 pr-4 font-medium">Student</th>
+                      <th className="py-2.5 pr-4 font-medium">Scheme</th>
+                      <th className="py-2.5 pr-4 font-medium">Submitted</th>
+                      <th className="py-2.5 pr-4 font-medium">Corrections</th>
+                      <th className="py-2.5 font-medium">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filtered.map(({ application, student, scheme: metaScheme, openDeficiencies: open }) => (
+                      <tr key={application.id} className="border-b border-line/60 last:border-0">
+                        <td className="py-3 pr-4">
+                          <Link
+                            href={`/admin/applications/${application.id}`}
+                            className="font-medium text-ink hover:text-maroon"
+                          >
+                            {application.applicationNumber || 'Draft'}
+                          </Link>
+                          <span className="block text-xs text-muted">{application.cycleLabel ?? '—'}</span>
+                        </td>
+                        <td className="py-3 pr-4">
+                          <span className="text-ink">{student?.fullName ?? 'Student'}</span>
+                          <span className="block text-xs text-muted">
+                            {student?.isST ? 'ST' : student?.category ?? '—'} · {student?.state ?? '—'}
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4 text-ink">{metaScheme?.shortName ?? '—'}</td>
+                        <td className="py-3 pr-4 text-muted">{formatDate(application.submittedAt)}</td>
+                        <td className="py-3 pr-4">
+                          {open > 0 ? <Badge tone="warning">{open} open</Badge> : <span className="text-muted">—</span>}
+                        </td>
+                        <td className="py-3">
+                          <ApplicationStatusBadge status={application.status} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <ul className="space-y-3 lg:hidden">
+                {filtered.map(({ application, student, scheme: metaScheme, openDeficiencies: open }) => (
+                  <li key={application.id}>
+                    <Link
+                      href={`/admin/applications/${application.id}`}
+                      className="block rounded-lg border border-line bg-surface p-3.5 transition-colors hover:border-maroon/40"
+                    >
+                      <span className="flex items-start justify-between gap-3">
+                        <span className="min-w-0">
+                          <span className="block truncate font-medium text-ink">
+                            {application.applicationNumber || 'Draft'}
+                          </span>
+                          <span className="mt-0.5 block text-xs text-muted">{application.cycleLabel ?? '—'}</span>
+                        </span>
+                        <ApplicationStatusBadge status={application.status} />
+                      </span>
+                      <span className="mt-3 block text-sm font-medium text-ink">{student?.fullName ?? 'Student'}</span>
+                      <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+                        <span>{student?.isST ? 'ST' : student?.category ?? '—'}</span>
+                        <span aria-hidden>·</span>
+                        <span>{student?.state ?? '—'}</span>
+                        <span aria-hidden>·</span>
+                        <span>{metaScheme?.shortName ?? '—'}</span>
+                        <span aria-hidden>·</span>
+                        <span>{formatDate(application.submittedAt)}</span>
+                        {open > 0 ? (
+                          <span className="mt-0.5">
+                            <Badge tone="warning">
+                              {open} correction{open > 1 ? 's' : ''} open
+                            </Badge>
+                          </span>
+                        ) : null}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
           <p className="mt-4 text-xs text-muted">
             Showing {filtered.length} of {all.length} applications
